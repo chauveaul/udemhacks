@@ -7,7 +7,7 @@ import itertools
 import json
 import websockets
 
-def pushup(push, t):
+def pushup(push, t, type):
     time.sleep(t)
 
     # Load video
@@ -28,6 +28,7 @@ def pushup(push, t):
 
     pushup_count = 0  # Initialize push-up count
     count=0
+    sendMessage("start:")
     # Process video
     while cap.isOpened():
         success, im0 = cap.read()
@@ -49,7 +50,7 @@ def pushup(push, t):
                 pushup_count = 0  # Default value if it's empty or unexpected
 
         # Display count on frame
-        cv2.putText(im0, f"Push-Ups: {pushup_count}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(im0, f"{type}: {pushup_count}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         # Write frame to video
         video_writer.write(im0)
@@ -59,11 +60,12 @@ def pushup(push, t):
         print(pushup_count)
         if (count != pushup_count):
             count = pushup_count
+            sendMessage(f"rep:{count}")
             print(f" __New Value__ {count}")
 
         # **Exit if push-up count reaches 5 or more**
         if pushup_count >= push:
-            print(f"Push-up goal reached! Exiting... Total push-ups: {pushup_count}")
+            print(f"{type} goal reached! Exiting... Total push-ups: {pushup_count}")
             break
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -75,8 +77,10 @@ def pushup(push, t):
     cap.release()
 
     # Print final push-up count
-    print(f"Final push-up count: {pushup_count}")
+    print(f"Final {type} count: {pushup_count}")
 
+async def sendMessage(message):
+    await websockets.send(message)
 
 def squat(squat,t):
     time.sleep(t)
@@ -98,7 +102,7 @@ def squat(squat,t):
     )
 
     pushup_count = 0  # Initialize squat count
-    count = 0
+    count = -1
     # Process video
     while cap.isOpened():
         success, im0 = cap.read()
@@ -130,6 +134,7 @@ def squat(squat,t):
         print(pushup_count)
         if(count!=pushup_count):
             count = pushup_count
+            sendMessage(f"rep:{count}")
             print(f" new value: {count}")
         # **Exit if push-up count reaches 5 or more**
         if pushup_count >= squat:
@@ -154,17 +159,24 @@ async def handler(websocket):
         try:
             message = await websocket.recv()
             events = json.loads(message)
-            for event in events:
+            for event in events:  #event might be a json object (you might want to json.loads(event))
                 match event["type"]:
                     case("pushup"):
-                        for i in event["set"]:
-                            pushup(int(event["rep"]),int(event["time"]))
+                        for i in range(event["set"]):
+                            await websocket.send(f"set:{i+1}")
+                            await websocket.send(f"time:{event["time"]}")
+                            pushup(event["rep"],event["time"],"pushup")
                     case("squat"):
-                        for i in event["set"]:
-                            squat(int(event["rep"]),int(event["time"]))
+                        for i in range(int(event["set"])):
+                            await websocket.send(f"set:{i+1}")
+                            await websocket.send(f"time:{event["time"]}")
+                            squat(event["rep"],event["time"])
                     case("curls"):
-                        for i in event["set"]:
-                            pushup(int(event["rep"]),int(event["time"]))
+                        for i in range(event["set"]):
+                            await websocket.send(f"set:{i+1}")
+                            await websocket.send(f"time:{event["time"]}")
+                            pushup(event["rep"],event["time"],"curls")
+
 
         except ConnectionClosedOK:
             break
