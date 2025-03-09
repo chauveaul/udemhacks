@@ -81,6 +81,26 @@ export default function RootLayout() {
           tabBarIcon: ({ color, size }) => <MealsIcon />,
         }}
       />
+
+      <Tabs.Screen
+        name="comingsoon"
+        options={{
+          title: "Coming Soon",
+          header: () => <CustomHeader />, // Custom Header
+          tabBarIcon: ({ color, size }) => <MealsIcon />,
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="workoutscreen"
+        options={{
+          title: "Workout Screen",
+          header: () => <CustomHeader />, // Custom Header
+          tabBarIcon: ({ color, size }) => <MealsIcon />,
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

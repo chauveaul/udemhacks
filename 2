@@ -1,0 +1,177 @@
+import React, { useState, useEffect } from "react";
+import { Text, View } from "react-native";
+import DropdownComponent from "../components/DropdownComponent";
+import { Card } from "@rneui/themed";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export default function Workout() {
+  const [value, setValue] = useState("");
+
+  // Load value from AsyncStorage when the component mounts
+  useEffect(() => {
+    const loadValue = async () => {
+      try {
+        const savedValue = await AsyncStorage.getItem("selectedWorkout");
+        if (savedValue !== null) {
+          setValue(savedValue); // Set the state if a value is saved
+        }
+      } catch (error) {
+        console.error("Error loading value from AsyncStorage", error);
+      }
+    };
+
+    loadValue();
+  }, []);
+
+  // Save value to AsyncStorage whenever it changes
+  const saveValue = async (newValue) => {
+    try {
+      await AsyncStorage.setItem("selectedWorkout", newValue);
+    } catch (error) {
+      console.error("Error saving value to AsyncStorage", error);
+    }
+  };
+
+  // Handle value change in dropdown
+  const handleValueChange = (newValue) => {
+    setValue(newValue); // Update state
+    saveValue(newValue); // Save to AsyncStorage
+  };
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        backgroundColor: "#D8DBE2",
+      }}
+    >
+      <View style={{ width: "100%" }}>
+        <DropdownComponent setState={handleValueChange} />
+      </View>
+      <View style={{ flex: 1, width: "100%", alignItems: "center" }}>
+        {/* Check if value is 'push' */}
+        {value === "push" && (
+          <View style={{ width: "100%" }}>
+            <Card containerStyle={{ borderRadius: 12, width: "90%" }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  gap: 20,
+                }}
+              >
+                <View>
+                  <Text>Push day</Text>
+                  <Text>Total sets: 12</Text>
+                  <Text>Total time: 45min</Text>
+                </View>
+                <View>
+                  <Text>Targeted muscles</Text>
+                  <Text>Chest</Text>
+                  <Text>Shoulders</Text>
+                  <Text>Triceps</Text>
+                </View>
+              </View>
+            </Card>
+
+            <Card containerStyle={{ borderRadius: 12, width: "90%" }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  gap: 20,
+                }}
+              >
+                <View>
+                  <Text>Push day</Text>
+                  <Text>Total sets: 12</Text>
+                  <Text>Total time: 45min</Text>
+                </View>
+                <View>
+                  <Text>Targeted muscles</Text>
+                  <Text>Chest</Text>
+                  <Text>Shoulders</Text>
+                  <Text>Triceps</Text>
+                </View>
+              </View>
+            </Card>
+          </View>
+        )}
+
+        {/* Check if value is 'pull' */}
+        {value === "pull" && (
+          <Card containerStyle={{ borderRadius: 12, width: "90%" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                gap: 20,
+              }}
+            >
+              <View>
+                <Text>Pull day</Text>
+                <Text>Total sets: 10</Text>
+                <Text>Total time: 40min</Text>
+              </View>
+              <View>
+                <Text>Targeted muscles</Text>
+                <Text>Back</Text>
+                <Text>Biceps</Text>
+                <Text>Forearms</Text>
+              </View>
+            </View>
+          </Card>
+        )}
+
+        {/* Check if value is 'legs' */}
+        {value === "legs" && (
+          <Card containerStyle={{ borderRadius: 12, width: "90%" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                gap: 20,
+              }}
+            >
+              <View>
+                <Text>Leg day</Text>
+                <Text>Total sets: 14</Text>
+                <Text>Total time: 50min</Text>
+              </View>
+              <View>
+                <Text>Targeted muscles</Text>
+                <Text>Quads</Text>
+                <Text>Hamstrings</Text>
+                <Text>Glutes</Text>
+              </View>
+            </View>
+          </Card>
+        )}
+
+        {/* Check if value is 'full' */}
+        {value === "full" && (
+          <Card containerStyle={{ borderRadius: 12, width: "90%" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                gap: 20,
+              }}
+            >
+              <View>
+                <Text>Full Body day</Text>
+                <Text>Total sets: 18</Text>
+                <Text>Total time: 60min</Text>
+              </View>
+              <View>
+                <Text>Targeted muscles</Text>
+                <Text>Full Body</Text>
+              </View>
+            </View>
+          </Card>
+        )}
+      </View>
+    </View>
+  );
+}
